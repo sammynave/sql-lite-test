@@ -1,7 +1,7 @@
 <script>
   import { sqlWorker, idbStore, dbReady } from "../stores/sql.js";
   import { update, all } from "idx-db";
-  import { wrap } from "../lib/worker.js";
+  import { post } from "../lib/worker.js";
 
   let todos = [];
   let loaded = false;
@@ -15,7 +15,7 @@
   $: notDoneTodos = todos.filter(x => !x.done);
 
   async function insert() {
-    await wrap({
+    await post({
       id: "insert-row",
       action: "exec",
       sql: `
@@ -42,15 +42,13 @@
 
   async function get() {
     try {
-      const event = await wrap({
+      const event = await post({
         id: "select-todos",
         action: "exec",
         sql: `SELECT * from todos;`
       });
       loaded = true;
-      if (event.data.results.length) {
-        todos = asObjects(event.data.results[0]);
-      }
+      todos = event.data.results.length ? asObjects(event.data.results[0]) : [];
     } catch (e) {
       throw e;
     }
@@ -58,7 +56,7 @@
 
   async function toggle(todo) {
     try {
-      const event = await wrap({
+      const event = await post({
         id: "update-todos",
         action: "exec",
         sql: `
@@ -86,7 +84,7 @@
 
   async function destroy(todo) {
     try {
-      const event = await wrap({
+      const event = await post({
         id: "delete-todos",
         action: "exec",
         sql: `
@@ -104,12 +102,13 @@
     } catch (e) {
       throw e;
     }
+
     await get();
     await save();
   }
 
   async function save() {
-    const event = await wrap({ action: "export" });
+    const event = await post({ action: "export" });
     await update($idbStore, "sqlDb", { id: 1, value: event.data.buffer });
   }
 </script>
