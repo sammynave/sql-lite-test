@@ -1,3 +1,8 @@
+# TODO
+- [] pull static/global.css and the wasm stuff into build folder so we can fingerprint and minify them
+
+
+
 # sapper-template
 
 The default [Sapper](https://github.com/sveltejs/sapper) template, available for Rollup and webpack.
