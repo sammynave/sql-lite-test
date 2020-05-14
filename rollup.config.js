@@ -22,14 +22,14 @@ export default {
     input: config.client.input(),
     output: config.client.output(),
     plugins: [
+      replace({
+        "process.browser": true,
+        "process.env.NODE_ENV": JSON.stringify(mode),
+      }),
       copy({
         targets: [
           {
             src: "node_modules/sql.js/dist/sql-wasm.wasm",
-            dest: "static",
-          },
-          {
-            src: "node_modules/sql.js/dist/worker.sql-wasm.js",
             dest: "static",
           },
           {
@@ -41,10 +41,6 @@ export default {
             dest: "static",
           },
         ],
-      }),
-      replace({
-        "process.browser": true,
-        "process.env.NODE_ENV": JSON.stringify(mode),
       }),
       svelte({
         dev,

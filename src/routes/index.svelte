@@ -13,16 +13,21 @@
 </script>
 
 <style>
-  .container {
-    display: flex;
-    flex-direction: column;
-    max-width: 400px;
-    place-items: center;
-    place-content: center;
+  form {
+    display: inline-flex;
+  }
+
+  input {
+    flex-grow: 1;
+    padding: 0.5em 1em;
+    margin: 0 0.5em;
   }
 </style>
 
 <svelte:options immutable />
+<svelte:head>
+  <title>Todos</title>
+</svelte:head>
 
 <form
   on:submit|preventDefault={async () => {
@@ -36,8 +41,6 @@
   <button type="submit" disabled={title === ''}>insert</button>
 </form>
 
-<div class="container">
-  {#each $todos as todo (todo.id)}
-    <Todo {todo} {toggle} {destroy} {updateText} />
-  {/each}
-</div>
+{#each $todos as todo (todo.id)}
+  <Todo {todo} {toggle} {destroy} {updateText} />
+{/each}
