@@ -1,7 +1,7 @@
-import { post } from "../worker.js";
-import { idbStore } from "../../stores/sql.js";
+import { post } from "../worker-utils.js";
 import { all } from "idx-db";
 import { get } from "svelte/store";
+import { sqlWorker, dbReady, idbStore } from "../../stores/sql.js";
 
 async function getExistingDb() {
   const [buffer] = await all(get(idbStore), "sqlDb");
@@ -10,11 +10,7 @@ async function getExistingDb() {
 
 async function getDbIfExists() {
   const backup = await getExistingDb();
-  if (
-    backup &&
-    backup.value &&
-    backup.value.constructor.name === "Uint8Array"
-  ) {
+  if (backup && backup.value) {
     return backup.value;
   }
 }
@@ -44,40 +40,14 @@ async function getDbIfExists() {
  * block the main thread
  */
 
-async function openDatabase() {
-  try {
-    const buffer = await getDbIfExists();
-    const openMessage = {
-      id: "open-db",
-      action: "open",
-      buffer,
-    };
-    await post(openMessage);
-    console.log(`${buffer ? "existing" : "new"} database opened`);
-  } catch (e) {
-    throw e;
-  }
-}
-
-async function createTodosTable() {
-  try {
-    const createTableMessage = {
-      id: "create-table",
-      action: "exec",
-      sql: `CREATE TABLE IF NOT EXISTS todos (
-	      id INTEGER PRIMARY KEY,
-        title TEXT NOT NULL,
-        done BOOL NOT NULL
-      );`,
-    };
-    await post(createTableMessage);
-    console.log("table created: todos");
-  } catch (e) {
-    throw e;
-  }
-}
-
 export async function initSqlDb() {
-  await openDatabase();
-  await createTodosTable();
+  const buffer = await getDbIfExists();
+  const worker = new Worker("/worker-sql.js");
+  sqlWorker.set(worker);
+  await post({
+    id: "init",
+    action: "open",
+    buffer,
+  });
+  dbReady.set(true);
 }

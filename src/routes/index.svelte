@@ -1,149 +1,43 @@
 <script>
-  import { sqlWorker, idbStore, dbReady } from "../stores/sql.js";
-  import { update, all } from "idx-db";
-  import { post } from "../lib/worker.js";
+  import {
+    get,
+    insert,
+    destroy,
+    toggle,
+    todos,
+    updateText
+  } from "../lib/todos.js";
+  import Todo from "../components/Todo.svelte";
 
-  let todos = [];
-  let loaded = false;
-  let doneTodos;
-  let notDoneTodos;
-
-  $: if (!loaded && $dbReady) {
-    get();
-  }
-  $: doneTodos = todos.filter(x => x.done);
-  $: notDoneTodos = todos.filter(x => !x.done);
-
-  async function insert() {
-    await post({
-      id: "insert-row",
-      action: "exec",
-      sql: `
-				INSERT INTO todos (title, done)
-				VALUES( $title,	$done);
-			`,
-      params: { $title: "hi", $done: false }
-    });
-    await get();
-    await save();
-  }
-
-  function asObjects(results) {
-    const { columns, values } = results;
-    return values.reduce((acc, value) => {
-      const row = columns.reduce((acc, c, i) => {
-        acc[c] = value[i];
-        return acc;
-      }, {});
-
-      return acc.concat([row]);
-    }, []);
-  }
-
-  async function get() {
-    try {
-      const event = await post({
-        id: "select-todos",
-        action: "exec",
-        sql: `SELECT * from todos;`
-      });
-      loaded = true;
-      todos = event.data.results.length ? asObjects(event.data.results[0]) : [];
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  async function toggle(todo) {
-    try {
-      const event = await post({
-        id: "update-todos",
-        action: "exec",
-        sql: `
-          UPDATE todos
-          SET done = $done
-          WHERE id = $id 
-        `,
-        params: {
-          $id: todo.id,
-          $done: todo.done === 1 ? 0 : 1
-        }
-      });
-      if (event.data && event.data.results && event.data.results.length) {
-        todos = asObjects(event.data.results[0]);
-      }
-      if (event.data.error) {
-        throw new Error(event.data.error);
-      }
-    } catch (e) {
-      throw e;
-    }
-    await get();
-    await save();
-  }
-
-  async function destroy(todo) {
-    try {
-      const event = await post({
-        id: "delete-todos",
-        action: "exec",
-        sql: `
-          DELETE FROM todos
-          WHERE id = $id
-        `,
-        params: { $id: todo.id }
-      });
-      if (event.data && event.data.results && event.data.results.length) {
-        todos = asObjects(event.data.results[0]);
-      }
-      if (event.data.error) {
-        throw new Error(event.data.error);
-      }
-    } catch (e) {
-      throw e;
-    }
-
-    await get();
-    await save();
-  }
-
-  async function save() {
-    const event = await post({ action: "export" });
-    await update($idbStore, "sqlDb", { id: 1, value: event.data.buffer });
-  }
+  let title = "";
 </script>
 
 <style>
-
+  .container {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    place-items: center;
+    place-content: center;
+  }
 </style>
 
-<svelte:head>
-  <title>Sapper project template</title>
-</svelte:head>
+<svelte:options immutable />
 
-<h1>hi</h1>
-<div>
-  <button on:click={insert}>insert</button>
-  <div>seems that sqlite returns nothing from inserts</div>
-</div>
+<form
+  on:submit|preventDefault={async () => {
+    if (title === '') {
+      return;
+    }
+    await insert({ title: title, done: false });
+    title = '';
+  }}>
+  <input type="text" bind:value={title} />
+  <button type="submit" disabled={title === ''}>insert</button>
+</form>
 
-<div>
-  not done
-  {#each notDoneTodos as r (r.id)}
-    <div>
-      <span on:click={() => toggle(r)}>🤷‍♂️</span>
-      {r.id},{r.title},{r.done}
-      <span on:click={() => destroy(r)}>X</span>
-    </div>
-  {/each}
-</div>
-<div>
-  done
-  {#each doneTodos as r (r.id)}
-    <div>
-      <span on:click={() => toggle(r)}>👍</span>
-      {r.id},{r.title},{r.done}
-      <span on:click={() => destroy(r)}>X</span>
-    </div>
+<div class="container">
+  {#each $todos as todo (todo.id)}
+    <Todo {todo} {toggle} {destroy} {updateText} />
   {/each}
 </div>

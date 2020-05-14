@@ -32,6 +32,14 @@ export default {
             src: "node_modules/sql.js/dist/worker.sql-wasm.js",
             dest: "static",
           },
+          {
+            src: "node_modules/sql.js/dist/sql-wasm.js",
+            dest: "static",
+          },
+          {
+            src: "workers/worker-sql.js",
+            dest: "static",
+          },
         ],
       }),
       replace({
@@ -72,7 +80,6 @@ export default {
             ],
           ],
         }),
-
       !dev &&
         terser({
           module: true,
