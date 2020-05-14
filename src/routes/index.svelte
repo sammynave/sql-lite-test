@@ -37,7 +37,7 @@
     await insert({ title: title, done: false });
     title = '';
   }}>
-  <input type="text" bind:value={title} />
+  <label>new todo: <input type="text" bind:value={title} /></label>
   <button type="submit" disabled={title === ''}>insert</button>
 </form>
 
