@@ -2,6 +2,7 @@ import { post } from "../worker-utils.js";
 import { all } from "idx-db";
 import { get } from "svelte/store";
 import { sqlWorker, dbReady, idbStore } from "../../stores/sql.js";
+import { handle } from "../todos.js";
 
 async function getExistingDb() {
   const [buffer] = await all(get(idbStore), "sqlDb");
@@ -44,10 +45,15 @@ export async function initSqlDb() {
   const buffer = await getDbIfExists();
   const worker = new Worker("/worker-sql.js");
   sqlWorker.set(worker);
-  await post({
+  const event = await post({
     id: "init",
     action: "open",
     buffer,
   });
-  dbReady.set(true);
+  const ready = await handle(event);
+  if (!ready) {
+    console.error("can not open sqlite db");
+    throw new Error(event);
+  }
+  dbReady.set(ready);
 }

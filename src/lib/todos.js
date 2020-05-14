@@ -3,7 +3,6 @@ import { update } from "idx-db";
 import { idbStore, dbReady } from "../stores/sql.js";
 import { get as getStore, writable } from "svelte/store";
 
-const $idbStore = getStore(idbStore);
 export const todos = writable([]);
 
 dbReady.subscribe(async (x) => {
@@ -25,8 +24,14 @@ function asObjects(results) {
 }
 
 const HANDLERS = {
+  init: async (event) => {
+    return event.data.ready;
+  },
   save: async (event) => {
-    await update($idbStore, "sqlDb", { id: 1, value: event.data.buffer });
+    await update(getStore(idbStore), "sqlDb", {
+      id: 1,
+      value: event.data.buffer,
+    });
     todos.set(await get());
   },
   get: async (event) => {
@@ -59,7 +64,7 @@ const HANDLERS = {
   },
 };
 
-function handle(event) {
+export function handle(event) {
   return HANDLERS[event.data.id](event);
 }
 
