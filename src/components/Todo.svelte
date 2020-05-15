@@ -13,7 +13,6 @@
     display: flex;
     place-content: center;
     place-items: center;
-    margin: 1em 0;
   }
   label {
     display: inline-flex;
