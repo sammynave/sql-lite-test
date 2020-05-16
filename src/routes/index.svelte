@@ -7,6 +7,7 @@
     todos,
     updateText
   } from "../lib/todos.js";
+  import { dbReady } from "../stores/sql.js";
   import Todo from "../components/Todo.svelte";
 
   let title = "";
@@ -37,10 +38,17 @@
     await insert({ title: title, done: false });
     title = '';
   }}>
-  <label>new todo: <input type="text" bind:value={title} /></label>
+  <label>
+    new todo:
+    <input type="text" bind:value={title} />
+  </label>
   <button type="submit" disabled={title === ''}>insert</button>
 </form>
 
-{#each $todos as todo (todo.id)}
-  <Todo {todo} {toggle} {destroy} {updateText} />
-{/each}
+{#if $dbReady}
+  {#each $todos as todo (todo.id)}
+    <Todo {todo} {toggle} {destroy} {updateText} />
+  {/each}
+{:else}
+  <h2>hang tight</h2>
+{/if}
