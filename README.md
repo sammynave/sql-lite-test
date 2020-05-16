@@ -1,6 +1,5 @@
 # TODO
 - [] pull static/global.css and the wasm stuff into build folder so we can fingerprint and minify them
-- [] http2 working in vercel
 
 
 
