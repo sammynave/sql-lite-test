@@ -1,13 +1,6 @@
 <script>
-  import {
-    get,
-    insert,
-    destroy,
-    toggle,
-    todos,
-    updateText
-  } from "../lib/todos.js";
-  import { dbReady } from "../stores/sql.js";
+  import { insert, destroy, toggle, updateText } from "../lib/todos.js";
+  import { dbReady, todos } from "../stores.js";
   import Todo from "../components/Todo.svelte";
 
   let title = "";

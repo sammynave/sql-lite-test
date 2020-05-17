@@ -1,4 +1,4 @@
-import { sqlWorker } from "../stores/sql.js";
+import { sqlWorker } from "../stores.js";
 import { get } from "svelte/store";
 
 export async function post(message) {

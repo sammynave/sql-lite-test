@@ -1,5 +1,5 @@
 import { openDb } from "idx-db";
-import { idbStore } from "../../stores/sql.js";
+import { idbStore } from "../../stores.js";
 
 const indexedDbStructure = [
   {

@@ -1,7 +1,7 @@
 import * as sapper from "@sapper/app";
-import { setupApp } from "./lib/setup.js";
+import { setupStores } from "./lib/setup.js";
 
-setupApp();
+setupStores();
 sapper.start({
   target: document.querySelector("#sapper"),
 });

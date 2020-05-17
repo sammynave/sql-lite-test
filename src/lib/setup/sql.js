@@ -1,18 +1,13 @@
 import { post } from "../worker-utils.js";
 import { all } from "idx-db";
 import { get } from "svelte/store";
-import { sqlWorker, dbReady, idbStore } from "../../stores/sql.js";
+import { sqlWorker, dbReady, idbStore } from "../../stores.js";
 import { handle } from "../todos.js";
 
 async function getExistingDb() {
   const [buffer] = await all(get(idbStore), "sqlDb");
-  return buffer;
-}
-
-async function getDbIfExists() {
-  const backup = await getExistingDb();
-  if (backup && backup.value) {
-    return backup.value;
+  if (buffer && buffer.value) {
+    return buffer.value;
   }
 }
 
@@ -42,7 +37,7 @@ async function getDbIfExists() {
  */
 
 export async function initSqlDb() {
-  const buffer = await getDbIfExists();
+  const buffer = await getExistingDb();
   const worker = new Worker("/worker-sql.js");
   sqlWorker.set(worker);
   const event = await post({

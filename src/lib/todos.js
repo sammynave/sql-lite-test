@@ -1,9 +1,7 @@
 import { post } from "./worker-utils.js";
 import { update } from "idx-db";
-import { idbStore, dbReady } from "../stores/sql.js";
-import { get as getStore, writable } from "svelte/store";
-
-export const todos = writable([]);
+import { idbStore, dbReady, todos } from "../stores.js";
+import { get as getStore } from "svelte/store";
 
 dbReady.subscribe(async (x) => {
   if (x) {
@@ -23,6 +21,13 @@ function asObjects(results) {
   }, []);
 }
 
+async function defaultHandler(event) {
+  if (event.data.error) {
+    throw new Error(event.data.error);
+  }
+  return await save();
+}
+
 const HANDLERS = {
   init: async (event) => {
     return event.data.ready;
@@ -39,29 +44,10 @@ const HANDLERS = {
       ? asObjects(event.data.results[0])
       : [];
   },
-  toggle: async (event) => {
-    if (event.data.error) {
-      throw new Error(event.data.error);
-    }
-    return await save();
-  },
-  updateText: async (event) => {
-    if (event.data.error) {
-      throw new Error(event.data.error);
-    }
-
-    return await save();
-  },
-  destroy: async (event) => {
-    if (event.data.error) {
-      throw new Error(event.data.error);
-    }
-
-    return await save();
-  },
-  insert: async (event) => {
-    return await save();
-  },
+  toggle: defaultHandler,
+  updateText: defaultHandler,
+  destroy: defaultHandler,
+  insert: defaultHandler,
 };
 
 export function handle(event) {
