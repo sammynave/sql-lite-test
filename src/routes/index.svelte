@@ -1,7 +1,14 @@
 <script>
-  import { insert, destroy, toggle, updateText } from "../lib/todos.js";
+  import {
+    insert,
+    destroy,
+    toggle,
+    updateText,
+    updateOrder
+  } from "../lib/todos.js";
   import { dbReady, todos } from "../stores.js";
   import Todo from "../components/Todo.svelte";
+  import SortableList from "../components/SortableList.svelte";
 
   let title = "";
   let inserting = false;
@@ -15,7 +22,7 @@
 
   input {
     flex-grow: 1;
-    padding: 0.5em 1em;
+    padding: 0.25em 0.5em;
     margin: 0 0.5em;
   }
 </style>
@@ -43,9 +50,12 @@
 </form>
 
 {#if $dbReady}
-  {#each $todos as todo (todo.id)}
-    <Todo {todo} {toggle} {destroy} {updateText} />
-  {/each}
+  <SortableList
+    list={$todos}
+    let:item
+    on:sort={({ detail: { from, to, id } }) => updateOrder({ from, to, id })}>
+    <Todo todo={item} {toggle} {destroy} {updateText} />
+  </SortableList>
 {:else}
   <h2>hang tight</h2>
 {/if}

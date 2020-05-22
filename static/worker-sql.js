@@ -12,7 +12,8 @@ const createTableSQL = `
 CREATE TABLE IF NOT EXISTS todos (
   id INTEGER PRIMARY KEY,
   title TEXT NOT NULL,
-  done BOOL NOT NULL
+  done BOOL NOT NULL,
+  order_id INTEGER NOT NULL
 );`;
 
 const ACTIONS = {

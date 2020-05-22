@@ -16,14 +16,21 @@
   }
   label {
     display: inline-flex;
-    padding: 1em;
+    padding: 0.5em;
+  }
+  .handle {
+    cursor: grab;
+    flex-grow: initial;
+  }
+  .handle:active {
+    cursor: grabbing;
   }
   input {
     transform: scale(1.5);
   }
   span {
     flex-grow: 1;
-    padding: 0.5em 1em;
+    padding: 0.5em 0.5em;
     margin: 0 0.5em;
   }
   button {
@@ -42,6 +49,7 @@
 </style>
 
 <div>
+  <span class="handle">grab</span>
   <label on:click={() => toggle(todo)}>
     <input type="checkbox" bind:checked={todo.done} />
   </label>
