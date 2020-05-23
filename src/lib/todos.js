@@ -46,6 +46,7 @@ const HANDLERS = {
   },
   toggle: defaultHandler,
   updateText: defaultHandler,
+  updateOrder: defaultHandler,
   destroy: defaultHandler,
   insert: defaultHandler,
 };
@@ -63,7 +64,7 @@ export async function get() {
   const event = await post({
     id: "get",
     action: "exec",
-    sql: `SELECT * from todos;`,
+    sql: `SELECT * from todos ORDER BY order_id desc;`,
   });
   return await handle(event);
 }
@@ -102,6 +103,33 @@ export async function updateText(todo, text) {
   return await handle(event);
 }
 
+export async function updateOrder({ from, to, id }) {
+  const event = await post({
+    id: "updateOrder",
+    action: "exec",
+    sql: `
+      ${
+        from > to
+          ? `UPDATE todos 
+        SET order_id = order_id + 1
+        WHERE order_id >= $to AND order_id <= $from;`
+          : `UPDATE todos 
+        SET order_id = order_id - 1
+        WHERE order_id >= $from AND order_id <= $to;`
+      }
+      UPDATE todos
+        SET order_id = $to
+        WHERE id = $id
+        `,
+    params: {
+      $id: id,
+      $to: to,
+      $from: from,
+    },
+  });
+  return await handle(event);
+}
+
 export async function destroy(todo) {
   const event = await post({
     id: "destroy",
@@ -120,8 +148,8 @@ export async function insert({ title, done }) {
     id: "insert",
     action: "exec",
     sql: `
-				INSERT INTO todos (title, done)
-				VALUES( $title,	$done);
+				INSERT INTO todos (title, done, order_id)
+				VALUES( $title,	$done, (SELECT IFNULL(MAX(order_id), -1) + 1 FROM todos));
 			`,
     params: { $title: title, $done: done },
   });
