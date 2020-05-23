@@ -92,7 +92,7 @@
     isOver = false;
     setTimeout(() => {
       dragged = false;
-    }, 10);
+    }, 50);
   }
 
   // DISPATCH REORDER
