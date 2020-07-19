@@ -9,6 +9,7 @@
   import { dbReady, todos } from "../stores.js";
   import Todo from "../components/Todo.svelte";
   import SortableList from "../components/SortableList.svelte";
+  import DraggableList from '../components/DraggableList.svelte';
 
   let title = "";
   let inserting = false;
@@ -50,12 +51,24 @@
 </form>
 
 {#if $dbReady}
+
+  <DraggableList
+    list={$todos}
+    let:item
+    on:sort={({ detail: { from, to, id } }) => updateOrder({ from, to, id })}>
+    <Todo todo={item} {toggle} {destroy} {updateText} />
+  </DraggableList>
+
+  <hr>
+
+<!--
   <SortableList
     list={$todos}
     let:item
     on:sort={({ detail: { from, to, id } }) => updateOrder({ from, to, id })}>
     <Todo todo={item} {toggle} {destroy} {updateText} />
   </SortableList>
+-->
 {:else}
   <h2>hang tight</h2>
 {/if}
